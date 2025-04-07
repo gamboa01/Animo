@@ -62,13 +62,45 @@ const frasesConAudio = [
     }
 ];
 
+
+// Copia mutable para controlar las frases no mostradas
+let frasesDisponibles = [...frasesConAudio];
 let audioActual = null; // Para controlar la reproducción
+
+// Función para obtener una frase aleatoria sin repetición
+function obtenerFraseUnica() {
+    if (frasesDisponibles.length === 0) {
+        frasesDisponibles = [...frasesConAudio]; // Reiniciar si ya se mostraron todas
+        mostrarNotificacion("¡Has visto todos los mensajes! Comenzamos de nuevo. 💖");
+    }
+
+    const indiceAleatorio = Math.floor(Math.random() * frasesDisponibles.length);
+    const fraseSeleccionada = frasesDisponibles[indiceAleatorio];
+    frasesDisponibles.splice(indiceAleatorio, 1); // Eliminar la frase del array disponible
+
+    return fraseSeleccionada;
+}
+
+// Función para mostrar notificación (opcional)
+function mostrarNotificacion(mensaje) {
+    const notificacion = document.createElement('div');
+    notificacion.className = 'position-fixed top-0 start-50 translate-middle-x p-3 w-100 text-center';
+    notificacion.style.zIndex = '1100'; // Asegura que esté por encima de otros elementos
+    notificacion.innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show d-inline-block" role="alert">
+            ${mensaje}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    document.body.appendChild(notificacion);
+    setTimeout(() => notificacion.remove(), 3000);
+}
 
 // Cambiar mensaje (ahora con audio)
 document.getElementById('cambiarMensaje').addEventListener('click', function() {
     const mensaje = document.getElementById('mensaje');
     const botonEscuchar = document.getElementById('escucharVoz');
-    const fraseAleatoria = frasesConAudio[Math.floor(Math.random() * frasesConAudio.length)];
+    const fraseAleatoria = obtenerFraseUnica();
     
     mensaje.textContent = `"${fraseAleatoria.texto}"`;
     botonEscuchar.dataset.audio = fraseAleatoria.audio;
